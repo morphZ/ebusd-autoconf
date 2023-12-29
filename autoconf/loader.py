@@ -18,7 +18,7 @@ FIELD_NAMES = ["name", "ms", "datatypes_templates", "divider_values", "unit", "c
 
 def send_ebusd_tcp(command: str, host: str = HOST, port: int = PORT) -> str:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((HOST, PORT))
+        s.connect((host, port))
         s.sendall(command.encode())
 
         buffer: bytes = b""
@@ -31,8 +31,8 @@ def send_ebusd_tcp(command: str, host: str = HOST, port: int = PORT) -> str:
     return buffer.decode()
 
 
-def load_config_tcp() -> pd.DataFrame:
-    config = send_ebusd_tcp("find -f\n")
+def load_config_tcp(host: str = HOST, port: int = PORT) -> pd.DataFrame:
+    config = send_ebusd_tcp("find -f -a\n", host=host, port=port)
     num_cols = max([len(line.split(",")) for line in config.split("\n")])
     col_names = [f"{i}" for i in range(0, num_cols)]
     df = pd.read_csv(StringIO(config), sep=",", header=None, names=col_names, dtype=str)
